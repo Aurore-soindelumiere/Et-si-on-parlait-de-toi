@@ -2,11 +2,12 @@
 // (questions 21 à 25), ou note que la participante a préféré s'arrêter.
 // Aucun nouveau questionnaire n'est créé : on met à jour la même ligne.
 
-import { EXTRA_QUESTIONS } from '../../../public/js/questions.js';
+// Depuis la version 2027-v3, ces questions font partie du parcours principal.
+// Cette route reste active pour les participantes qui avaient ouvert une ancienne version.
 import { validateAnswers, validateIdAndToken, ValidationError } from '../../_lib/validate.js';
 import { json, error, readJson, sameOrigin, logError, sha256Hex, safeEqual } from '../../_lib/http.js';
 
-const EXTRA_IDS = EXTRA_QUESTIONS.map((q) => q.id);
+const EXTRA_IDS = ['q21', 'q22', 'q23', 'q24', 'q25'];
 
 export async function onRequestPost({ request, env }) {
   if (!sameOrigin(request)) return error(403, 'origin');
@@ -18,7 +19,7 @@ export async function onRequestPost({ request, env }) {
   try {
     validateIdAndToken(body.id, body.token);
     if (body.status !== 'completed' && body.status !== 'declined') throw new ValidationError('status');
-    if (body.status === 'completed') answers = validateAnswers(body.answers, EXTRA_IDS);
+    if (body.status === 'completed') answers = validateAnswers(body.answers, EXTRA_IDS, { legacy: true });
   } catch (err) {
     if (err instanceof ValidationError) return error(400, 'invalid');
     throw err;

@@ -120,13 +120,13 @@ Fais ces vérifications depuis **ton téléphone**, idéalement en ouvrant le li
 3. « Aucune de ces peurs » décoche les autres réponses (et inversement).
 4. « Autre » ouvre un petit champ de texte.
 5. Ferme l’application au milieu, rouvre le lien : on te propose de **reprendre**.
-6. Question 14 : seules tes 3 thématiques de la question 13 sont proposées.
+6. Question 8 : seules tes 3 thématiques de la question 7 sont proposées. Les approfondissements (passé, argent, corps, intuition) n’apparaissent que si tu as choisi la thématique correspondante.
 7. Passe en **mode avion** juste avant « Valider mes réponses » : le message rassurant apparaît. Réactive le réseau, réessaie : ça passe, sans doublon.
 8. Termine, inscris-toi à la liste d’attente avec ton adresse.
 9. Dans `/admin`, vérifie que ton questionnaire et ton inscription apparaissent, puis teste les trois exports.
 10. **Supprime ensuite tes réponses de test** (rubrique « Les mots » → « Supprimer tout ce questionnaire », et « Liste d’attente » → « Supprimer »). Pour repartir d’une base vide, tu peux aussi exécuter dans la console D1 : `DELETE FROM survey_responses; DELETE FROM waitlist;`
 
-⏱️ **Durée réelle** : demande à 3 ou 4 personnes de confiance de chronométrer leur parcours. L’accueil annonce « Environ 15 minutes » : donne-moi les vrais temps et j’ajuste. Si c’est trop long, je te proposerai des allègements **avant** de supprimer des questions importantes.
+⏱️ **Durée réelle** : demande à 3 ou 4 personnes de confiance de chronométrer leur parcours. L’accueil annonce « Environ 10 minutes » : donne-moi les vrais temps et j’ajuste. Si c’est trop long, je te proposerai des allègements **avant** de supprimer des questions importantes.
 
 ---
 
@@ -136,10 +136,10 @@ Rends-toi sur `https://et-si-on-parlait-de-toi.pages.dev/admin` :
 
 | Rubrique | Ce que tu y trouves |
 |---|---|
-| **Vue d’ensemble** | nombre de questionnaires, chapitres complémentaires, inscriptions, réponses du jour et des 7 derniers jours, graphique par jour |
-| **Univers prioritaires** | Classement A (question 13 : les 3 priorités), Classement B (question 14 : LA priorité) et un tableau « populaire ou vraiment prioritaire ? » |
+| **Vue d’ensemble** | nombre de questionnaires, inscriptions, réponses du jour et des 7 derniers jours, graphique par jour |
+| **Univers prioritaires** | Classement A (question 7 : les 3 priorités), Classement B (question 8 : LA priorité) et un tableau « populaire ou vraiment prioritaire ? » |
 | **Toutes les réponses** | chaque question, avec le nombre de répondantes et de personnes l’ayant passée |
-| **Les mots** | les réponses libres (question 20 et « Autre »), recherche, suppression d’un texte |
+| **Les mots** | les réponses libres (dernière question et « Autre »), recherche, suppression d’un texte |
 | **Formats préférés** | durées, moments, habitudes d’écoute, attentes, freins, fonctionnalités |
 | **Modèle économique** | achat, abonnements, budgets (intentions déclarées, pas des prévisions de ventes) |
 | **Liste d’attente** | adresses, dates, consentement, désinscription, suppression, export |

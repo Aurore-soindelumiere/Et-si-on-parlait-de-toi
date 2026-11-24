@@ -1,7 +1,7 @@
 // Validation stricte des réponses reçues par le serveur.
 // Tout ce qui ne correspond pas exactement au questionnaire est refusé.
 
-import { LIMITS, getQuestion } from '../../public/js/questions.js';
+import { LIMITS, getQuestion, isShown } from '../../public/js/questions.js';
 
 export class ValidationError extends Error {
   constructor(message) {
@@ -23,21 +23,22 @@ function cleanText(value, max) {
 }
 
 /** Options visibles pour une question (gère la question 14, qui dépend de la 13). */
-function allowedOptionIds(question, answers) {
+function allowedOptionIds(question, answers, legacy) {
   if (question.source) {
     const src = answers[question.source];
     if (src && Array.isArray(src.selected) && src.selected.length > 0) return new Set(src.selected);
   }
-  return new Set(question.options.map((o) => o.id));
+  const opts = legacy ? [...question.options, ...(question.legacyOptions || [])] : question.options;
+  return new Set(opts.map((o) => o.id));
 }
 
-function validateChoice(question, raw, answers) {
+function validateChoice(question, raw, answers, legacy) {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) throw new ValidationError('Format invalide');
   const selected = raw.selected;
   if (!Array.isArray(selected)) throw new ValidationError('Format invalide');
   if (selected.length === 0) return null; // question passée
 
-  const allowed = allowedOptionIds(question, answers);
+  const allowed = allowedOptionIds(question, answers, legacy);
   const unique = [...new Set(selected)];
   if (unique.length !== selected.length) throw new ValidationError('Doublon');
   for (const id of unique) {
@@ -77,7 +78,7 @@ function validateBudget(question, raw) {
  * Valide un ensemble de réponses pour une liste d'identifiants de questions autorisées.
  * @returns {object} réponses nettoyées (questions passées = absentes)
  */
-export function validateAnswers(rawAnswers, allowedQuestionIds) {
+export function validateAnswers(rawAnswers, allowedQuestionIds, { legacy = false } = {}) {
   if (typeof rawAnswers !== 'object' || rawAnswers === null || Array.isArray(rawAnswers)) {
     throw new ValidationError('Réponses invalides');
   }
@@ -90,8 +91,10 @@ export function validateAnswers(rawAnswers, allowedQuestionIds) {
     const raw = rawAnswers[qid];
     if (raw === undefined || raw === null) continue;
     const question = getQuestion(qid);
+    // Question d'approfondissement non concernée : réponse ignorée (version actuelle).
+    if (!legacy && !isShown(question, clean)) continue;
     let value = null;
-    if (question.type === 'multi' || question.type === 'single') value = validateChoice(question, raw, clean);
+    if (question.type === 'multi' || question.type === 'single') value = validateChoice(question, raw, clean, legacy);
     else if (question.type === 'text') {
       if (typeof raw !== 'object' || Array.isArray(raw)) throw new ValidationError('Format invalide');
       const text = cleanText(raw.text, question.maxLength || LIMITS.freeText);

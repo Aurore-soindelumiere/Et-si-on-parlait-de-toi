@@ -2,7 +2,7 @@
 
 *Et si tes mots m’aidaient à écrire la suite ?*
 
-Mini-application de questionnaire introspectif (20 questions + 5 facultatives), pensée pour le navigateur d’Instagram, avec un espace administrateur privé.
+Mini-application de questionnaire introspectif (19 à 23 questions selon les réponses, environ 10 minutes), pensée pour le navigateur d’Instagram, avec un espace administrateur privé.
 
 👉 **Pour la mise en ligne, suis le guide pas à pas : [`docs/GUIDE.md`](docs/GUIDE.md).**
 
@@ -18,8 +18,8 @@ public/                      ← ce que voient les participantes (HTML, CSS, JS,
   admin/                     ← ton espace privé (protégé)
 functions/                   ← fonctions serveur (Cloudflare Pages Functions)
   _middleware.js             ← verrou de l’espace admin + en-têtes de sécurité
-  api/survey/submit.js       ← enregistrement du questionnaire principal
-  api/survey/extra.js        ← ajout du chapitre complémentaire (même ligne, sans doublon)
+  api/survey/submit.js       ← enregistrement du questionnaire
+  api/survey/extra.js        ← ancien chapitre facultatif (versions 2027-v1/v2 uniquement)
   api/waitlist.js            ← liste d’attente (table séparée)
   api/admin/*                ← statistiques, textes, liste d’attente, exports CSV
   _lib/                      ← validation, authentification, statistiques, CSV

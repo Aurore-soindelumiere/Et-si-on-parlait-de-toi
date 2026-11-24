@@ -2,7 +2,7 @@
 // Règle : pour chaque question, le pourcentage = nombre de sélections ÷ nombre
 // de personnes AYANT RÉPONDU à cette question (pas le total des sélections).
 
-import { QUESTIONS, CHAPTERS } from '../../public/js/questions.js';
+import { QUESTIONS, CHAPTERS, versionBefore, isShown } from '../../public/js/questions.js';
 
 export async function loadResponses(env) {
   const { results } = await env.DB.prepare(
@@ -58,13 +58,15 @@ function choiceStats(question, rows, base, idSuffix = '', partId = null) {
     chapter: question.chapter,
     type: partId ? 'single' : question.type,
     title: part ? `${question.title} — ${part.title}` : question.title,
+    retired: !!question.retired,
+    conditional: !!question.showIf,
     max: question.max || null,
     base,
     respondents,
     skipped: Math.max(0, base - respondents),
     otherTexts,
     // Les anciennes options n'apparaissent que si quelqu'un les a choisies.
-    options: [...current, ...legacy.filter((o) => counts[o.id] > 0)]
+    options: [...current, ...legacy.filter((o) => counts[o.id] > 0).map((o) => ({ ...o, label: `${o.label} (ancienne formulation)` }))]
       .map((o) => ({
         id: o.id,
         label: o.label,
@@ -76,21 +78,37 @@ function choiceStats(question, rows, base, idSuffix = '', partId = null) {
   };
 }
 
+const OLD = (row) => versionBefore(row.survey_version, '2027-v3');
+
+/**
+ * La question a-t-elle été posée à cette participante ?
+ * - anciennes versions : toutes les questions d'alors (le chapitre facultatif seulement si complété) ;
+ * - version actuelle : questions non retirées, approfondissements seulement si concernée.
+ */
+export function wasAsked(q, row) {
+  if (OLD(row)) {
+    if (q.since) return false;
+    if (q.formerExtra) return row.extra_status === 'completed';
+    return true;
+  }
+  if (q.retired) return false;
+  return isShown(q, answersOf(row));
+}
+
 export function computeQuestionStats(rows) {
-  const total = rows.length;
-  const extraRows = rows.filter((r) => r.extra_status === 'completed');
   const out = [];
   for (const q of QUESTIONS) {
-    const isExtra = q.chapter === 'extra';
-    const pool = isExtra ? extraRows : rows;
+    const pool = rows.filter((r) => wasAsked(q, r));
     const base = pool.length;
+    // Question retirée sans aucune réponse : inutile de l'afficher.
+    if (q.retired && pool.every((r) => !answersOf(r)[q.id])) continue;
     if (q.type === 'text') {
       const respondents = pool.filter((r) => {
         const a = answersOf(r)[q.id];
         return a && a.text;
       }).length;
       out.push({
-        id: q.id, number: q.number, chapter: q.chapter, type: 'text', title: q.title,
+        id: q.id, number: q.number, chapter: q.chapter, type: 'text', title: q.title, retired: false, conditional: false,
         base, respondents, skipped: base - respondents, options: [],
       });
     } else if (q.type === 'budget') {

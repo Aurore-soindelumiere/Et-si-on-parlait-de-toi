@@ -8,20 +8,30 @@
 //  stables : ils servent aux statistiques. Tu peux corriger le TEXTE
 //  affiché ("label", "title"…) sans risque, mais ne modifie pas les id
 //  une fois le questionnaire publié.
+//
+//  Historique des versions :
+//   - 2027-v1 : version initiale (20 questions + 5 facultatives)
+//   - 2027-v2 : questions 15 et 17 reformulées
+//   - 2027-v3 : version courte (moins de 10 minutes) : questions 8, 12 et 19
+//               retirées, réponses regroupées, approfondissements posés
+//               seulement aux personnes concernées, questions sur le format
+//               et le budget intégrées au parcours principal.
+//  Les anciennes réponses (« legacyOptions », questions « retired ») restent
+//  comptées dans les statistiques.
 // =====================================================================
 
-export const SURVEY_VERSION = '2027-v2';
+export const SURVEY_VERSION = '2027-v3';
+export const VERSIONS = ['2027-v1', '2027-v2', '2027-v3'];
 
 // Durée affichée sur l'écran d'accueil (à ajuster après tes tests).
-export const ESTIMATED_DURATION = 'Environ 15 minutes';
+export const ESTIMATED_DURATION = 'Environ 10 minutes';
 
 // Limites de longueur (vérifiées aussi côté serveur).
 export const LIMITS = {
   otherText: 300,   // champ « Autre »
-  freeText: 1500,   // question 20
+  freeText: 1500,   // question libre finale
 };
 
-// Textes « Autre » : options dont le choix ouvre un petit champ libre.
 const OTHER = { id: 'other', label: 'Autre', other: true };
 
 export const CHAPTERS = [
@@ -45,22 +55,21 @@ export const CHAPTERS = [
     ],
   },
   {
-    id: 'c3',
-    number: 3,
-    title: 'Ce que tu aimerais t’autoriser',
-    intro: [
-      'Et si on parlait maintenant de toutes ces choses auxquelles tu aimerais te donner accès ?',
-      'Recevoir davantage, t’écouter, te sentir bien dans ton corps, faire confiance à tes ressentis…',
-      'Qu’est-ce qui compte vraiment pour toi ?',
-    ],
-  },
-  {
     id: 'c4',
-    number: 4,
+    number: 3,
     title: 'Ce dont tu as réellement besoin',
     intro: [
       'Tu t’es peut-être reconnue dans beaucoup de choses depuis le début de cette parenthèse.',
       'Mais parmi tout cela, qu’est-ce qui ferait réellement la différence dans ta vie aujourd’hui ?',
+    ],
+  },
+  {
+    id: 'c3',
+    number: 4,
+    title: 'Ce que tu aimerais t’autoriser',
+    intro: [
+      'Tu viens de choisir ce qui compte le plus pour toi.',
+      'J’aimerais aller un tout petit peu plus loin, uniquement sur ces sujets-là.',
     ],
   },
   {
@@ -74,27 +83,26 @@ export const CHAPTERS = [
     ],
   },
   {
-    id: 'c6',
+    id: 'extra',
     number: 6,
+    title: 'Et demain ?',
+    intro: [
+      'J’ai envie de créer quelque chose qui puisse réellement trouver sa place dans ton quotidien, et pas quelque chose que tu laisserais de côté au bout de quelques jours.',
+      'Ces quelques questions vont m’aider à imaginer la suite.',
+    ],
+  },
+  {
+    id: 'c6',
+    number: 7,
     title: 'Les mots que tu n’as peut-être jamais posés',
     intro: [
       'Une dernière question, peut-être la plus précieuse.',
       'Prends le temps qu’il te faut.',
     ],
   },
-  {
-    id: 'extra',
-    number: null,
-    title: 'Encore un petit instant ?',
-    intro: [
-      'Merci de m’avoir partagé tout ça.',
-      'Si tu as encore deux petites minutes, j’aimerais te poser quelques questions supplémentaires pour m’aider à imaginer la suite.',
-      'J’ai envie de créer quelque chose qui puisse réellement trouver sa place dans ton quotidien, et pas quelque chose que tu laisserais de côté au bout de quelques jours.',
-    ],
-  },
 ];
 
-// Thématiques de la question 13 (réutilisées par la question 14).
+// Thématiques de la question « trois aspects » (réutilisées par « s’il ne devait en rester qu’un »).
 const Q13_OPTIONS = [
   { id: 'confidence', label: 'La confiance en moi.' },
   { id: 'self_esteem', label: 'L’estime et l’amour de moi.' },
@@ -122,8 +130,9 @@ const Q13_OPTIONS = [
   OTHER,
 ];
 
+// Ordre du tableau = ordre d'affichage. "number" = numéro affiché dans ton espace admin.
 export const QUESTIONS = [
-  // ───────────── CHAPITRE 1 ─────────────
+  // ───────────── CHAPITRE 1 — Ce que tu vis à l'intérieur ─────────────
   {
     id: 'q1', number: 1, chapter: 'c1', type: 'multi',
     title: 'Quel regard portes-tu sur toi aujourd’hui ?',
@@ -132,35 +141,44 @@ export const QUESTIONS = [
       { id: 'compare', label: 'Je me compare constamment aux autres.' },
       { id: 'never_enough', label: 'Je ne me sens jamais assez bien.' },
       { id: 'self_doubt', label: 'Je doute de moi et de mes capacités.' },
-      { id: 'minimize', label: 'Je minimise mes réussites.' },
       { id: 'not_legit', label: 'Je ne me sens pas légitime.' },
       { id: 'own_value', label: 'J’ai du mal à reconnaître ma propre valeur.' },
       { id: 'too_hard', label: 'Je suis beaucoup trop dure avec moi-même.' },
-      { id: 'not_interesting', label: 'Je ne me trouve pas assez intéressante.' },
       { id: 'body', label: 'J’ai du mal à accepter mon corps.' },
       { id: 'who_am_i', label: 'Je ne sais plus vraiment qui je suis.' },
       { id: 'feel_good', label: 'Je me sens plutôt bien avec moi-même.' },
       OTHER,
     ],
+    legacyOptions: [
+      { id: 'minimize', label: 'Je minimise mes réussites.' },
+      { id: 'not_interesting', label: 'Je ne me trouve pas assez intéressante.' },
+    ],
   },
   {
     id: 'q2', number: 2, chapter: 'c1', type: 'multi',
-    title: 'Quelle place t’accordes-tu dans ta vie ?',
+    title: 'Quelle place t’accordes-tu dans ta vie et dans tes relations ?',
     hint: 'Plusieurs réponses possibles.',
     options: [
       { id: 'others_first', label: 'Je fais toujours passer les autres avant moi.' },
       { id: 'guilt_me_time', label: 'Je culpabilise lorsque je prends du temps pour moi.' },
-      { id: 'say_no', label: 'J’ai du mal à dire non.' },
-      { id: 'disappoint', label: 'J’ai peur de décevoir.' },
+      { id: 'say_no_limits', label: 'J’ai du mal à dire non et à poser mes limites.' },
+      { id: 'disappoint_bother', label: 'J’ai peur de décevoir ou de déranger.' },
       { id: 'validation', label: 'J’ai besoin de la validation des autres.' },
-      { id: 'adapt', label: 'Je m’adapte constamment aux personnes qui m’entourent.' },
       { id: 'express', label: 'Je n’ose pas exprimer ce que je ressens vraiment.' },
       { id: 'responsible', label: 'Je me sens responsable du bonheur des autres.' },
-      { id: 'bother', label: 'J’ai peur de déranger.' },
       { id: 'give_more', label: 'Je donne beaucoup plus que je ne reçois.' },
+      { id: 'hurtful', label: 'J’accepte des comportements qui me blessent.' },
+      { id: 'love_patterns', label: 'Je reproduis les mêmes schémas dans mes relations amoureuses.' },
+      { id: 'trust', label: 'J’ai du mal à faire confiance.' },
       { id: 'no_desire', label: 'Je ne sais même plus ce dont j’ai envie.' },
       { id: 'respect_needs', label: 'Je parviens à respecter mes besoins.' },
       OTHER,
+    ],
+    legacyOptions: [
+      { id: 'say_no', label: 'J’ai du mal à dire non.' },
+      { id: 'disappoint', label: 'J’ai peur de décevoir.' },
+      { id: 'adapt', label: 'Je m’adapte constamment aux personnes qui m’entourent.' },
+      { id: 'bother', label: 'J’ai peur de déranger.' },
     ],
   },
   {
@@ -174,15 +192,17 @@ export const QUESTIONS = [
       { id: 'overwhelmed', label: 'Je me sens facilement submergée.' },
       { id: 'others_emotions', label: 'J’ai l’impression de porter les émotions des autres.' },
       { id: 'worry', label: 'Je ressens souvent une inquiétude sans savoir pourquoi.' },
-      { id: 'control', label: 'J’ai besoin de tout contrôler.' },
       { id: 'lonely', label: 'Je me sens seule, même entourée.' },
-      { id: 'hold_in', label: 'Je retiens beaucoup de choses en moi.' },
       { id: 'anger', label: 'J’ai du mal à exprimer ma colère.' },
-      { id: 'present', label: 'Je n’arrive pas à profiter pleinement du moment présent.' },
       { id: 'emptiness', label: 'Je ressens une forme de vide intérieur.' },
       { id: 'evening_calm', label: 'J’ai du mal à trouver le calme le soir.' },
       { id: 'peaceful', label: 'Je me sens plutôt apaisée.' },
       OTHER,
+    ],
+    legacyOptions: [
+      { id: 'control', label: 'J’ai besoin de tout contrôler.' },
+      { id: 'hold_in', label: 'Je retiens beaucoup de choses en moi.' },
+      { id: 'present', label: 'Je n’arrive pas à profiter pleinement du moment présent.' },
     ],
   },
   {
@@ -204,29 +224,35 @@ export const QUESTIONS = [
     ],
   },
 
-  // ───────────── CHAPITRE 2 ─────────────
+  // ───────────── CHAPITRE 2 — Ce qui te retient ─────────────
   {
     id: 'q5', number: 5, chapter: 'c2', type: 'multi',
     title: 'Quelles peurs prennent le plus de place dans ta vie ?',
     hint: 'Plusieurs réponses possibles.',
     options: [
+      { id: 'gaze_judgment', label: 'La peur du regard et du jugement des autres.' },
+      { id: 'rejection_abandon', label: 'La peur d’être rejetée ou abandonnée.' },
+      { id: 'unloved', label: 'La peur de ne pas être aimée.' },
+      { id: 'failure_not_enough', label: 'La peur d’échouer ou de ne pas être à la hauteur.' },
+      { id: 'success', label: 'La peur de réussir.' },
+      { id: 'lack', label: 'La peur de manquer.' },
+      { id: 'lose_control', label: 'La peur de perdre le contrôle.' },
+      { id: 'unknown_choice', label: 'La peur de l’inconnu ou de faire le mauvais choix.' },
+      { id: 'no_place', label: 'La peur de ne jamais trouver ma place.' },
+      { id: 'show_self', label: 'La peur de montrer qui je suis vraiment.' },
+      { id: 'none', label: 'Aucune de ces peurs particulièrement.', exclusive: true },
+      OTHER,
+    ],
+    legacyOptions: [
       { id: 'others_gaze', label: 'La peur du regard des autres.' },
       { id: 'judged', label: 'La peur d’être jugée.' },
       { id: 'rejected', label: 'La peur d’être rejetée.' },
       { id: 'abandoned', label: 'La peur d’être abandonnée.' },
-      { id: 'unloved', label: 'La peur de ne pas être aimée.' },
       { id: 'failure', label: 'La peur d’échouer.' },
-      { id: 'success', label: 'La peur de réussir.' },
-      { id: 'lack', label: 'La peur de manquer.' },
-      { id: 'lose_control', label: 'La peur de perdre le contrôle.' },
       { id: 'unknown', label: 'La peur de l’inconnu.' },
       { id: 'wrong_decision', label: 'La peur de prendre une mauvaise décision.' },
       { id: 'alone', label: 'La peur de me retrouver seule.' },
-      { id: 'no_place', label: 'La peur de ne jamais trouver ma place.' },
-      { id: 'show_self', label: 'La peur de montrer qui je suis vraiment.' },
       { id: 'not_up_to', label: 'La peur de ne pas être à la hauteur.' },
-      { id: 'none', label: 'Aucune de ces peurs particulièrement.', exclusive: true },
-      OTHER,
     ],
   },
   {
@@ -234,28 +260,53 @@ export const QUESTIONS = [
     title: 'Quelles phrases résonnent le plus en toi ?',
     hint: 'Plusieurs réponses possibles.',
     options: [
-      { id: 'be_strong', label: 'Je dois être forte.' },
+      { id: 'strong_manage', label: 'Je dois être forte et tout gérer.' },
       { id: 'earn_love', label: 'Je dois mériter l’amour.' },
-      { id: 'not_enough', label: 'Je ne suis pas assez.' },
-      { id: 'prove', label: 'Je dois faire mes preuves.' },
+      { id: 'not_enough_capable', label: 'Je ne suis pas assez bien, pas assez capable.' },
+      { id: 'prove_deserve', label: 'Je dois faire mes preuves et travailler dur pour mériter ce que je reçois.' },
       { id: 'only_me', label: 'Je ne peux compter que sur moi-même.' },
-      { id: 'perfect', label: 'Je dois être parfaite pour être appréciée.' },
+      { id: 'perfect_no_mistake', label: 'Je dois être parfaite, je n’ai pas le droit à l’erreur.' },
       { id: 'selfish', label: 'Si je pense à moi, je suis égoïste.' },
       { id: 'deserve_less', label: 'Je ne mérite pas autant que les autres.' },
+      { id: 'happiness_ends', label: 'Le bonheur ne dure jamais.' },
+      { id: 'be_myself_risk', label: 'Je ne peux pas être pleinement moi-même sans risquer de perdre quelqu’un.' },
+      { id: 'be_useful', label: 'Je dois être utile pour avoir de la valeur.' },
+      { id: 'none', label: 'Aucune de ces phrases.', exclusive: true },
+      OTHER,
+    ],
+    legacyOptions: [
+      { id: 'be_strong', label: 'Je dois être forte.' },
+      { id: 'not_enough', label: 'Je ne suis pas assez.' },
+      { id: 'prove', label: 'Je dois faire mes preuves.' },
+      { id: 'perfect', label: 'Je dois être parfaite pour être appréciée.' },
       { id: 'work_hard', label: 'Je dois travailler dur pour mériter ce que je reçois.' },
       { id: 'not_capable', label: 'Je ne suis pas capable.' },
       { id: 'no_mistake', label: 'Je n’ai pas le droit à l’erreur.' },
       { id: 'manage_all', label: 'Je dois tout gérer.' },
-      { id: 'happiness_ends', label: 'Le bonheur ne dure jamais.' },
-      { id: 'be_myself_risk', label: 'Je ne peux pas être pleinement moi-même sans risquer de perdre quelqu’un.' },
-      { id: 'be_useful', label: 'Je dois être utile pour avoir de la valeur.' },
       { id: 'no_slowing', label: 'Je ne peux pas me permettre de ralentir.' },
-      { id: 'none', label: 'Aucune de ces phrases.', exclusive: true },
-      OTHER,
     ],
   },
+
+  // ───────────── CHAPITRE 3 — Ce dont tu as réellement besoin ─────────────
   {
-    id: 'q7', number: 7, chapter: 'c2', type: 'multi', optional: true,
+    id: 'q13', number: 7, chapter: 'c4', type: 'multi', max: 3,
+    title: 'Si tu pouvais travailler sur trois aspects de toi en priorité, lesquels choisirais-tu ?',
+    hint: 'Trois réponses maximum.',
+    options: Q13_OPTIONS,
+  },
+  {
+    id: 'q14', number: 8, chapter: 'c4', type: 'single', source: 'q13',
+    title: 'Et s’il ne devait en rester qu’un ?',
+    note: 'Parmi les aspects que tu viens de sélectionner, lequel aurait, selon toi, le plus grand impact sur ta vie aujourd’hui ?',
+    noteWhenSkipped: 'Parmi tous ces aspects, lequel aurait, selon toi, le plus grand impact sur ta vie aujourd’hui ?',
+    hint: 'Une seule réponse possible.',
+    options: Q13_OPTIONS,
+  },
+
+  // ───────────── CHAPITRE 4 — Approfondissements (seulement si choisis) ─────────────
+  {
+    id: 'q7', number: 9, chapter: 'c3', type: 'multi', optional: true,
+    showIf: { question: 'q13', anyOf: ['childhood_wounds', 'past_wounds', 'family_patterns', 'grief'] },
     title: 'Y a-t-il des choses du passé dont tu ressens encore le poids ?',
     hint: 'Question facultative. Plusieurs réponses possibles.',
     note: 'Tu n’as pas besoin de raconter ton histoire.',
@@ -277,30 +328,8 @@ export const QUESTIONS = [
     ],
   },
   {
-    id: 'q8', number: 8, chapter: 'c2', type: 'multi',
-    title: 'Dans tes relations, qu’aimerais-tu réussir à changer ?',
-    hint: 'Plusieurs réponses possibles.',
-    options: [
-      { id: 'stop_forgetting', label: 'Arrêter de m’oublier pour être aimée.' },
-      { id: 'abandon_fear', label: 'Ne plus avoir peur que l’on m’abandonne.' },
-      { id: 'boundaries', label: 'Apprendre à poser mes limites.' },
-      { id: 'hurtful', label: 'Ne plus accepter des comportements qui me blessent.' },
-      { id: 'save_everyone', label: 'Arrêter de chercher à sauver tout le monde.' },
-      { id: 'dependency', label: 'Ne plus dépendre du regard ou de l’amour des autres.' },
-      { id: 'trust', label: 'Apprendre à faire confiance.' },
-      { id: 'express_needs', label: 'Oser exprimer mes besoins.' },
-      { id: 'love_patterns', label: 'Arrêter de reproduire les mêmes schémas amoureux.' },
-      { id: 'distance_guilt', label: 'Ne plus culpabiliser lorsque je prends mes distances.' },
-      { id: 'balanced', label: 'Construire des relations plus équilibrées.' },
-      { id: 'receive', label: 'Apprendre à recevoir autant que je donne.' },
-      { id: 'satisfied', label: 'Je suis satisfaite de mes relations.' },
-      OTHER,
-    ],
-  },
-
-  // ───────────── CHAPITRE 3 ─────────────
-  {
-    id: 'q9', number: 9, chapter: 'c3', type: 'multi',
+    id: 'q9', number: 10, chapter: 'c3', type: 'multi',
+    showIf: { question: 'q13', anyOf: ['money'] },
     title: 'Quelle relation entretiens-tu avec l’argent et le fait de recevoir ?',
     hint: 'Plusieurs réponses possibles.',
     options: [
@@ -319,7 +348,8 @@ export const QUESTIONS = [
     ],
   },
   {
-    id: 'q10', number: 10, chapter: 'c3', type: 'multi', optional: true,
+    id: 'q10', number: 11, chapter: 'c3', type: 'multi', optional: true,
+    showIf: { question: 'q13', anyOf: ['body'] },
     title: 'Quelle relation aimerais-tu avoir avec ton corps ?',
     hint: 'Question facultative. Plusieurs réponses possibles.',
     options: [
@@ -339,7 +369,8 @@ export const QUESTIONS = [
     ],
   },
   {
-    id: 'q11', number: 11, chapter: 'c3', type: 'multi',
+    id: 'q11', number: 12, chapter: 'c3', type: 'multi',
+    showIf: { question: 'q13', anyOf: ['intuition', 'hypersensitivity'] },
     title: 'Et concernant ton intuition et ta spiritualité ?',
     hint: 'Plusieurs réponses possibles.',
     options: [
@@ -358,60 +389,18 @@ export const QUESTIONS = [
       OTHER,
     ],
   },
-  {
-    id: 'q12', number: 12, chapter: 'c3', type: 'multi', max: 5,
-    title: 'Qu’aimerais-tu profondément réussir à faire ?',
-    hint: 'Cinq réponses maximum.',
-    options: [
-      { id: 'love_self', label: 'M’aimer telle que je suis.' },
-      { id: 'confidence', label: 'Avoir confiance en moi.' },
-      { id: 'value', label: 'Reconnaître ma valeur.' },
-      { id: 'choose_self', label: 'Me choisir sans culpabiliser.' },
-      { id: 'take_place', label: 'Oser prendre ma place.' },
-      { id: 'free_gaze', label: 'Me libérer du regard des autres.' },
-      { id: 'joy', label: 'Retrouver ma joie de vivre.' },
-      { id: 'inner_safety', label: 'Me sentir en sécurité intérieurement.' },
-      { id: 'past_peace', label: 'Faire la paix avec mon passé.' },
-      { id: 'let_go', label: 'Apprendre à lâcher prise.' },
-      { id: 'free_be_me', label: 'Me sentir libre d’être pleinement moi.' },
-      { id: 'receive', label: 'M’autoriser à recevoir.' },
-      { id: 'creativity', label: 'Retrouver ma créativité.' },
-      { id: 'dreams', label: 'Oser réaliser mes rêves.' },
-      { id: 'intuition', label: 'Me reconnecter à mon intuition.' },
-      { id: 'meaning', label: 'Retrouver du sens dans ma vie.' },
-      { id: 'peace', label: 'Me sentir apaisée.' },
-      { id: 'self_sabotage', label: 'Arrêter de me saboter.' },
-      { id: 'forgive_self', label: 'Apprendre à me pardonner.' },
-      OTHER,
-    ],
-  },
 
-  // ───────────── CHAPITRE 4 ─────────────
+  // ───────────── CHAPITRE 5 — Ta réalité au quotidien ─────────────
   {
-    id: 'q13', number: 13, chapter: 'c4', type: 'multi', max: 3,
-    title: 'Si tu pouvais travailler sur trois aspects de toi en priorité, lesquels choisirais-tu ?',
-    hint: 'Trois réponses maximum.',
-    options: Q13_OPTIONS,
-  },
-  {
-    id: 'q14', number: 14, chapter: 'c4', type: 'single', source: 'q13',
-    title: 'Et s’il ne devait en rester qu’un ?',
-    note: 'Parmi les aspects que tu viens de sélectionner, lequel aurait, selon toi, le plus grand impact sur ta vie aujourd’hui ?',
-    noteWhenSkipped: 'Parmi tous ces aspects, lequel aurait, selon toi, le plus grand impact sur ta vie aujourd’hui ?',
-    hint: 'Une seule réponse possible.',
-    options: Q13_OPTIONS,
-  },
-  {
-    id: 'q15', number: 15, chapter: 'c4', type: 'multi', max: 3,
+    id: 'q15', number: 13, chapter: 'c5', type: 'multi', max: 3,
     title: 'Quand tu t’accordes un moment pour prendre soin de toi, de l’intérieur, qu’aimerais-tu avant tout qu’il t’apporte ?',
     note: 'Souffler, comprendre, avancer… ou un peu de tout ça. Il n’y a pas de bonne réponse.',
     hint: 'Trois réponses maximum.',
     options: [
       { id: 'soothed_now', label: 'Me sentir immédiatement plus apaisée.' },
-      { id: 'understand_why', label: 'Comprendre pourquoi je fonctionne de cette manière.' },
+      { id: 'understand', label: 'Mieux me comprendre et comprendre pourquoi je fonctionne ainsi.' },
       { id: 'realizations', label: 'Avoir des prises de conscience.' },
-      { id: 'free_fears', label: 'Me libérer progressivement de certaines peurs.' },
-      { id: 'beliefs', label: 'Faire évoluer mes croyances.' },
+      { id: 'free_fears_beliefs', label: 'Me libérer de certaines peurs ou croyances.' },
       { id: 'self_talk', label: 'Apprendre à me parler autrement.' },
       { id: 'deep_change', label: 'Ressentir une évolution profonde en moi.' },
       { id: 'supported', label: 'Me sentir soutenue dans les moments difficiles.' },
@@ -419,35 +408,41 @@ export const QUESTIONS = [
       { id: 'habits', label: 'Réussir à changer certaines habitudes.' },
       { id: 'reconnect', label: 'Me reconnecter à mes ressentis.' },
       { id: 'nothing_to_manage', label: 'Simplement avoir un moment où je n’ai rien à gérer.' },
-      { id: 'know_self', label: 'Apprendre à mieux me connaître.' },
       OTHER,
     ],
+    legacyOptions: [
+      { id: 'understand_why', label: 'Comprendre pourquoi je fonctionne de cette manière.' },
+      { id: 'free_fears', label: 'Me libérer progressivement de certaines peurs.' },
+      { id: 'beliefs', label: 'Faire évoluer mes croyances.' },
+      { id: 'know_self', label: 'Apprendre à mieux me connaître.' },
+    ],
   },
-
-  // ───────────── CHAPITRE 5 ─────────────
   {
-    id: 'q16', number: 16, chapter: 'c5', type: 'multi',
+    id: 'q16', number: 14, chapter: 'c5', type: 'multi',
     title: 'Qu’est-ce qui t’empêche aujourd’hui de prendre davantage soin de toi ?',
     hint: 'Plusieurs réponses possibles.',
     options: [
       { id: 'time', label: 'Le manque de temps.' },
       { id: 'energy', label: 'Le manque d’énergie.' },
       { id: 'money', label: 'Le manque de moyens financiers.' },
-      { id: 'where_start', label: 'Je ne sais pas par où commencer.' },
-      { id: 'what_helps', label: 'Je ne sais pas ce qui pourrait réellement m’aider.' },
+      { id: 'start_what_helps', label: 'Je ne sais pas par où commencer, ni ce qui pourrait vraiment m’aider.' },
       { id: 'guilt', label: 'Je culpabilise lorsque je prends du temps pour moi.' },
       { id: 'regularity', label: 'J’ai du mal à être régulière.' },
-      { id: 'never_finish', label: 'Je commence des choses que je ne termine jamais.' },
       { id: 'tried_before', label: 'J’ai déjà essayé plusieurs choses sans ressentir les changements espérés.' },
-      { id: 'alone_work', label: 'Je préfère être seule pour faire ce travail.' },
-      { id: 'ask_help', label: 'J’ai du mal à demander de l’aide.' },
       { id: 'privacy', label: 'Je manque d’intimité ou de tranquillité chez moi.' },
       { id: 'nothing', label: 'Rien de particulier.', exclusive: true },
       OTHER,
     ],
+    legacyOptions: [
+      { id: 'where_start', label: 'Je ne sais pas par où commencer.' },
+      { id: 'what_helps', label: 'Je ne sais pas ce qui pourrait réellement m’aider.' },
+      { id: 'never_finish', label: 'Je commence des choses que je ne termine jamais.' },
+      { id: 'alone_work', label: 'Je préfère être seule pour faire ce travail.' },
+      { id: 'ask_help', label: 'J’ai du mal à demander de l’aide.' },
+    ],
   },
   {
-    id: 'q17', number: 17, chapter: 'c5', type: 'single',
+    id: 'q17', number: 15, chapter: 'c5', type: 'single',
     title: 'Combien de temps pourrais-tu réellement t’accorder ?',
     hint: 'Une seule réponse possible.',
     options: [
@@ -460,18 +455,16 @@ export const QUESTIONS = [
       { id: 'depends', label: 'Cela dépend vraiment des jours.' },
       { id: 'dont_know', label: 'Je ne sais pas encore.' },
     ],
-    // Anciennes réponses (version 2027-v1) : plus proposées, mais toujours
-    // affichées dans les statistiques si des participantes les ont choisies.
     legacyOptions: [
-      { id: 'm3_5', label: '3 à 5 minutes. (ancienne formulation)' },
-      { id: 'm6_10', label: '6 à 10 minutes. (ancienne formulation)' },
-      { id: 'm11_15', label: '11 à 15 minutes. (ancienne formulation)' },
-      { id: 'm16_25', label: '16 à 25 minutes. (ancienne formulation)' },
-      { id: 'm26_30', label: '26 à 30 minutes. (ancienne formulation)' },
+      { id: 'm3_5', label: '3 à 5 minutes.' },
+      { id: 'm6_10', label: '6 à 10 minutes.' },
+      { id: 'm11_15', label: '11 à 15 minutes.' },
+      { id: 'm16_25', label: '16 à 25 minutes.' },
+      { id: 'm26_30', label: '26 à 30 minutes.' },
     ],
   },
   {
-    id: 'q18', number: 18, chapter: 'c5', type: 'multi',
+    id: 'q18', number: 16, chapter: 'c5', type: 'multi',
     title: 'À quel moment aimerais-tu pouvoir prendre ce temps pour toi ?',
     hint: 'Plusieurs réponses possibles.',
     options: [
@@ -487,44 +480,20 @@ export const QUESTIONS = [
     ],
   },
   {
-    id: 'q19', number: 19, chapter: 'c5', type: 'multi',
-    title: 'Quelle manière d’être accompagnée te correspondrait le mieux ?',
-    hint: 'Plusieurs réponses possibles.',
+    id: 'q19b', number: 17, chapter: 'c5', type: 'single', since: '2027-v3',
+    title: 'Comment aimerais-tu être accompagnée ?',
+    hint: 'Une seule réponse possible.',
     options: [
-      { id: 'free_choice', label: 'Pouvoir choisir librement selon mon état émotionnel du moment.' },
-      { id: 'progressive', label: 'Suivre un parcours progressif, étape par étape.' },
-      { id: 'short', label: 'Avoir des expériences courtes pour les journées chargées.' },
-      { id: 'long', label: 'Avoir des expériences plus longues lorsque j’en ressens le besoin.' },
-      { id: 'revisit', label: 'Pouvoir revenir plusieurs fois sur un même sujet.' },
-      { id: 'guided_to_needs', label: 'Être guidée vers ce qui correspond à mes besoins.' },
-      { id: 'notes', label: 'Pouvoir noter mes prises de conscience.' },
-      { id: 'track', label: 'Garder une trace de mon évolution.' },
-      { id: 'new_regularly', label: 'Découvrir régulièrement de nouvelles expériences.' },
-      { id: 'reminders', label: 'Recevoir de petits rappels pour penser à moi.' },
-      { id: 'no_pressure', label: 'Avancer sans aucune obligation ni pression.' },
-      { id: 'from_home', label: 'Pouvoir faire tout cela depuis chez moi.' },
-      OTHER,
+      { id: 'free', label: 'Choisir librement, selon mon état du moment.' },
+      { id: 'path', label: 'Suivre un parcours guidé, étape par étape.' },
+      { id: 'mix', label: 'Un mélange des deux.' },
+      { id: 'dont_know', label: 'Je ne sais pas encore.' },
     ],
   },
 
-  // ───────────── CHAPITRE 6 ─────────────
+  // ───────────── CHAPITRE 6 — Et demain ? ─────────────
   {
-    id: 'q20', number: 20, chapter: 'c6', type: 'text', optional: true,
-    title: 'Si tu pouvais changer une seule chose à l’intérieur de toi…',
-    lead: [
-      'Pas dans ta vie extérieure.',
-      'Pas chez les personnes qui t’entourent.',
-      'Mais vraiment en toi.',
-      'Qu’est-ce que ce serait ?',
-    ],
-    placeholder: 'J’aimerais tellement réussir à…',
-    note: 'Tu peux déposer tes mots ici si tu en ressens l’envie. Tu peux aussi passer cette question. Merci de ne pas indiquer de nom, de coordonnées, d’informations médicales ou de détails permettant de t’identifier ou d’identifier quelqu’un d’autre.',
-    maxLength: LIMITS.freeText,
-  },
-
-  // ───────────── CHAPITRE COMPLÉMENTAIRE ─────────────
-  {
-    id: 'q21', number: 21, chapter: 'extra', type: 'single',
+    id: 'q21', number: 18, chapter: 'extra', type: 'single', formerExtra: true,
     title: 'As-tu déjà utilisé des audios pour prendre soin de toi ou travailler sur toi-même ?',
     hint: 'Une seule réponse possible.',
     options: [
@@ -537,10 +506,10 @@ export const QUESTIONS = [
     ],
   },
   {
-    id: 'q22', number: 22, chapter: 'extra', type: 'multi',
+    id: 'q22', number: 19, chapter: 'extra', type: 'multi', formerExtra: true,
     title: 'Qu’est-ce qui te manque dans les audios ou les accompagnements que tu as déjà essayés ?',
     hint: 'Plusieurs réponses possibles.',
-    // Formulation adaptée si la participante n'a jamais utilisé d'audios (Q21).
+    // Formulation adaptée si la participante n'a jamais utilisé d'audios.
     adapt: {
       when: { question: 'q21', anyOf: ['no_interested', 'no_not_for_me'] },
       title: 'Qu’est-ce qui pourrait te donner envie de découvrir des audios pour prendre soin de toi ?',
@@ -548,10 +517,8 @@ export const QUESTIONS = [
       hideOptions: ['satisfied'],
     },
     options: [
-      { id: 'generic', label: 'Je trouve les contenus trop génériques.' },
-      { id: 'not_recognize', label: 'Je ne me reconnais pas dans ce qui est proposé.' },
+      { id: 'generic_not_me', label: 'Les contenus sont trop génériques, je ne m’y reconnais pas.' },
       { id: 'go_further', label: 'Je ressens un apaisement sur le moment, mais j’aimerais aller plus loin.' },
-      { id: 'more_realizations', label: 'J’aimerais avoir davantage de prises de conscience.' },
       { id: 'too_long', label: 'Les audios sont trop longs.' },
       { id: 'too_short', label: 'Les audios sont trop courts.' },
       { id: 'focus', label: 'J’ai du mal à rester concentrée.' },
@@ -559,38 +526,47 @@ export const QUESTIONS = [
       { id: 'spiritual', label: 'Il manque une dimension spirituelle ou énergétique.' },
       { id: 'concrete', label: 'Il manque des pistes concrètes pour mon quotidien.' },
       { id: 'choose', label: 'Je ne sais pas quel contenu choisir selon mes besoins.' },
-      { id: 'regularity', label: 'J’ai du mal à être régulière.' },
-      { id: 'repetitive', label: 'Je trouve les contenus trop répétitifs.' },
       { id: 'satisfied', label: 'Je suis satisfaite de ce que j’utilise actuellement.' },
       { id: 'never_tried', label: 'Je n’ai jamais essayé.', exclusive: true },
       OTHER,
     ],
-  },
-  {
-    id: 'q23', number: 23, chapter: 'extra', type: 'multi', max: 5,
-    title: 'Qu’aimerais-tu retrouver dans un espace entièrement consacré à ton évolution intérieure ?',
-    hint: 'Cinq réponses maximum.',
-    options: [
-      { id: 'short_audios', label: 'Des audios guidés courts.' },
-      { id: 'deep_audios', label: 'Des audios guidés plus approfondis.' },
-      { id: 'sleep_audios', label: 'Des audios à écouter avant de dormir.' },
-      { id: 'morning_audios', label: 'Des audios pour commencer ma journée.' },
-      { id: 'hard_moments', label: 'Des audios à écouter dans les moments difficiles.' },
-      { id: 'themed_paths', label: 'Des parcours organisés par thématique.' },
-      { id: 'introspection', label: 'Des exercices d’introspection.' },
-      { id: 'recommendations', label: 'Des recommandations adaptées à mon ressenti du moment.' },
-      { id: 'journal', label: 'Un carnet personnel pour noter mes déclics.' },
-      { id: 'progress', label: 'Un espace pour suivre mon évolution.' },
-      { id: 'favorites', label: 'La possibilité d’enregistrer mes contenus favoris.' },
-      { id: 'new_regularly', label: 'De nouvelles expériences régulièrement.' },
-      { id: 'challenges', label: 'Des petits défis à réaliser à mon rythme.' },
-      { id: 'rituals', label: 'Des rituels simples.' },
-      { id: 'screen_free', label: 'La possibilité d’écouter sans avoir besoin de regarder mon écran.' },
-      OTHER,
+    legacyOptions: [
+      { id: 'generic', label: 'Je trouve les contenus trop génériques.' },
+      { id: 'not_recognize', label: 'Je ne me reconnais pas dans ce qui est proposé.' },
+      { id: 'more_realizations', label: 'J’aimerais avoir davantage de prises de conscience.' },
+      { id: 'regularity', label: 'J’ai du mal à être régulière.' },
+      { id: 'repetitive', label: 'Je trouve les contenus trop répétitifs.' },
     ],
   },
   {
-    id: 'q24', number: 24, chapter: 'extra', type: 'single',
+    id: 'q23', number: 20, chapter: 'extra', type: 'multi', max: 3, formerExtra: true,
+    title: 'Qu’aimerais-tu retrouver dans un espace entièrement consacré à ton évolution intérieure ?',
+    hint: 'Trois réponses maximum.',
+    options: [
+      { id: 'sleep_audios', label: 'Des audios à écouter avant de dormir.' },
+      { id: 'morning_audios', label: 'Des audios pour commencer ma journée.' },
+      { id: 'hard_moments', label: 'Des audios à écouter dans les moments difficiles.' },
+      { id: 'introspection', label: 'Des exercices d’introspection.' },
+      { id: 'recommendations', label: 'Des recommandations adaptées à mon ressenti du moment.' },
+      { id: 'journal_progress', label: 'Un carnet pour noter mes déclics et suivre mon évolution.' },
+      { id: 'new_regularly', label: 'De nouvelles expériences régulièrement.' },
+      { id: 'rituals_challenges', label: 'Des petits rituels ou défis à réaliser à mon rythme.' },
+      { id: 'screen_free', label: 'La possibilité d’écouter sans avoir besoin de regarder mon écran.' },
+      OTHER,
+    ],
+    legacyOptions: [
+      { id: 'short_audios', label: 'Des audios guidés courts.' },
+      { id: 'deep_audios', label: 'Des audios guidés plus approfondis.' },
+      { id: 'themed_paths', label: 'Des parcours organisés par thématique.' },
+      { id: 'journal', label: 'Un carnet personnel pour noter mes déclics.' },
+      { id: 'progress', label: 'Un espace pour suivre mon évolution.' },
+      { id: 'favorites', label: 'La possibilité d’enregistrer mes contenus favoris.' },
+      { id: 'challenges', label: 'Des petits défis à réaliser à mon rythme.' },
+      { id: 'rituals', label: 'Des rituels simples.' },
+    ],
+  },
+  {
+    id: 'q24', number: 21, chapter: 'extra', type: 'single', formerExtra: true,
     title: 'Quel fonctionnement te conviendrait le mieux pour accéder à des ressources de bien-être ?',
     hint: 'Une seule réponse possible.',
     options: [
@@ -604,7 +580,7 @@ export const QUESTIONS = [
     ],
   },
   {
-    id: 'q25', number: 25, chapter: 'extra', type: 'budget', optional: true,
+    id: 'q25', number: 22, chapter: 'extra', type: 'budget', optional: true, formerExtra: true,
     title: 'Quel budget te semblerait envisageable pour un espace de bien-être qui répond réellement à tes besoins ?',
     hint: 'Question facultative. Une réponse par partie.',
     parts: [
@@ -640,10 +616,95 @@ export const QUESTIONS = [
       },
     ],
   },
+
+  // ───────────── CHAPITRE 7 — Les mots ─────────────
+  {
+    id: 'q20', number: 23, chapter: 'c6', type: 'text', optional: true,
+    title: 'Si tu pouvais changer une seule chose à l’intérieur de toi…',
+    lead: [
+      'Pas dans ta vie extérieure.',
+      'Pas chez les personnes qui t’entourent.',
+      'Mais vraiment en toi.',
+      'Qu’est-ce que ce serait ?',
+    ],
+    placeholder: 'J’aimerais tellement réussir à…',
+    note: 'Tu peux déposer tes mots ici si tu en ressens l’envie. Tu peux aussi passer cette question. Merci de ne pas indiquer de nom, de coordonnées, d’informations médicales ou de détails permettant de t’identifier ou d’identifier quelqu’un d’autre.',
+    maxLength: LIMITS.freeText,
+  },
+
+  // ───────────── Questions retirées (versions 2027-v1 et v2) ─────────────
+  // Plus posées, mais conservées pour afficher les réponses déjà reçues.
+  {
+    id: 'q8', number: null, chapter: 'c2', type: 'multi', retired: true,
+    title: 'Dans tes relations, qu’aimerais-tu réussir à changer ?',
+    options: [
+      { id: 'stop_forgetting', label: 'Arrêter de m’oublier pour être aimée.' },
+      { id: 'abandon_fear', label: 'Ne plus avoir peur que l’on m’abandonne.' },
+      { id: 'boundaries', label: 'Apprendre à poser mes limites.' },
+      { id: 'hurtful', label: 'Ne plus accepter des comportements qui me blessent.' },
+      { id: 'save_everyone', label: 'Arrêter de chercher à sauver tout le monde.' },
+      { id: 'dependency', label: 'Ne plus dépendre du regard ou de l’amour des autres.' },
+      { id: 'trust', label: 'Apprendre à faire confiance.' },
+      { id: 'express_needs', label: 'Oser exprimer mes besoins.' },
+      { id: 'love_patterns', label: 'Arrêter de reproduire les mêmes schémas amoureux.' },
+      { id: 'distance_guilt', label: 'Ne plus culpabiliser lorsque je prends mes distances.' },
+      { id: 'balanced', label: 'Construire des relations plus équilibrées.' },
+      { id: 'receive', label: 'Apprendre à recevoir autant que je donne.' },
+      { id: 'satisfied', label: 'Je suis satisfaite de mes relations.' },
+      OTHER,
+    ],
+  },
+  {
+    id: 'q12', number: null, chapter: 'c3', type: 'multi', max: 5, retired: true,
+    title: 'Qu’aimerais-tu profondément réussir à faire ?',
+    options: [
+      { id: 'love_self', label: 'M’aimer telle que je suis.' },
+      { id: 'confidence', label: 'Avoir confiance en moi.' },
+      { id: 'value', label: 'Reconnaître ma valeur.' },
+      { id: 'choose_self', label: 'Me choisir sans culpabiliser.' },
+      { id: 'take_place', label: 'Oser prendre ma place.' },
+      { id: 'free_gaze', label: 'Me libérer du regard des autres.' },
+      { id: 'joy', label: 'Retrouver ma joie de vivre.' },
+      { id: 'inner_safety', label: 'Me sentir en sécurité intérieurement.' },
+      { id: 'past_peace', label: 'Faire la paix avec mon passé.' },
+      { id: 'let_go', label: 'Apprendre à lâcher prise.' },
+      { id: 'free_be_me', label: 'Me sentir libre d’être pleinement moi.' },
+      { id: 'receive', label: 'M’autoriser à recevoir.' },
+      { id: 'creativity', label: 'Retrouver ma créativité.' },
+      { id: 'dreams', label: 'Oser réaliser mes rêves.' },
+      { id: 'intuition', label: 'Me reconnecter à mon intuition.' },
+      { id: 'meaning', label: 'Retrouver du sens dans ma vie.' },
+      { id: 'peace', label: 'Me sentir apaisée.' },
+      { id: 'self_sabotage', label: 'Arrêter de me saboter.' },
+      { id: 'forgive_self', label: 'Apprendre à me pardonner.' },
+      OTHER,
+    ],
+  },
+  {
+    id: 'q19', number: null, chapter: 'c5', type: 'multi', retired: true,
+    title: 'Quelle manière d’être accompagnée te correspondrait le mieux ? (ancienne version, plusieurs choix)',
+    options: [
+      { id: 'free_choice', label: 'Pouvoir choisir librement selon mon état émotionnel du moment.' },
+      { id: 'progressive', label: 'Suivre un parcours progressif, étape par étape.' },
+      { id: 'short', label: 'Avoir des expériences courtes pour les journées chargées.' },
+      { id: 'long', label: 'Avoir des expériences plus longues lorsque j’en ressens le besoin.' },
+      { id: 'revisit', label: 'Pouvoir revenir plusieurs fois sur un même sujet.' },
+      { id: 'guided_to_needs', label: 'Être guidée vers ce qui correspond à mes besoins.' },
+      { id: 'notes', label: 'Pouvoir noter mes prises de conscience.' },
+      { id: 'track', label: 'Garder une trace de mon évolution.' },
+      { id: 'new_regularly', label: 'Découvrir régulièrement de nouvelles expériences.' },
+      { id: 'reminders', label: 'Recevoir de petits rappels pour penser à moi.' },
+      { id: 'no_pressure', label: 'Avancer sans aucune obligation ni pression.' },
+      { id: 'from_home', label: 'Pouvoir faire tout cela depuis chez moi.' },
+      OTHER,
+    ],
+  },
 ];
 
-export const MAIN_QUESTIONS = QUESTIONS.filter((q) => q.chapter !== 'extra');
-export const EXTRA_QUESTIONS = QUESTIONS.filter((q) => q.chapter === 'extra');
+// Questions posées dans la version actuelle, dans l'ordre d'affichage.
+export const MAIN_QUESTIONS = QUESTIONS.filter((q) => !q.retired);
+// Ancien chapitre facultatif (n'existe plus : intégré au parcours principal).
+export const EXTRA_QUESTIONS = [];
 
 export function getQuestion(id) {
   return QUESTIONS.find((q) => q.id === id);
@@ -651,6 +712,23 @@ export function getQuestion(id) {
 
 export function getChapter(id) {
   return CHAPTERS.find((c) => c.id === id);
+}
+
+/** Version a < version b ? (versions inconnues considérées comme récentes) */
+export function versionBefore(a, b) {
+  const ia = VERSIONS.indexOf(a);
+  const ib = VERSIONS.indexOf(b);
+  if (ia === -1 || ib === -1) return false;
+  return ia < ib;
+}
+
+/** La question est-elle posée, compte tenu des réponses déjà données ? */
+export function isShown(question, answers) {
+  if (question.retired) return false;
+  if (!question.showIf) return true;
+  const src = answers[question.showIf.question];
+  const sel = src && Array.isArray(src.selected) ? src.selected : [];
+  return sel.some((id) => question.showIf.anyOf.includes(id));
 }
 
 // Version du texte de consentement de la liste d'attente.
