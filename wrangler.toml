@@ -6,4 +6,4 @@ pages_build_output_dir = "./public"
 [[d1_databases]]
 binding = "DB"                                   # nom utilisé dans le code (env.DB)
 database_name = "et-si-on-parlait-de-toi"
-database_id = "REMPLACER_PAR_L_ID_DE_TA_BASE_D1"  # voir docs/GUIDE.md, étape 3
+database_id = "979b41ce-ae9e-4a6b-b7eb-e97493209000"

@@ -37,7 +37,7 @@ Le code se trouve sur la branche `claude/et-si-on-parlait-de-toi-0ryepy` de ton 
 2. Dans le menu de gauche : **Stockage et bases de données → D1** (en anglais : *Storage & Databases → D1 SQL Database*).
 3. Clique sur **Créer** (*Create*). Nom : `et-si-on-parlait-de-toi`. Emplacement : laisse le choix automatique ou choisis l’Europe (*Western Europe*). Valide.
 4. Dans ta nouvelle base, ouvre l’onglet **Console**.
-5. Ouvre dans GitHub le fichier `migrations/0001_init.sql`, copie **tout** son contenu, colle-le dans la console Cloudflare et clique sur **Exécuter** (*Execute*).
+5. Ouvre dans GitHub le fichier `migrations/console-cloudflare.sql` (version sur une seule ligne, prévue pour la console), copie **tout** son contenu, colle-le dans la console Cloudflare et clique sur **Exécuter** (*Execute*).
 6. Sur la page de la base, repère le **Database ID** (une longue suite de lettres et chiffres, du type `a1b2c3d4-…`).
 
 👉 **Envoie-moi ce Database ID** : je l’ajoute dans le fichier `wrangler.toml` à ta place.
