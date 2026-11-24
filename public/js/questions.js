@@ -13,7 +13,7 @@
 export const SURVEY_VERSION = '2027-v1';
 
 // Durée affichée sur l'écran d'accueil (à ajuster après tes tests).
-export const ESTIMATED_DURATION = 'Environ 10 minutes';
+export const ESTIMATED_DURATION = 'Environ 15 minutes';
 
 // Limites de longueur (vérifiées aussi côté serveur).
 export const LIMITS = {

@@ -126,7 +126,7 @@ Fais ces vérifications depuis **ton téléphone**, idéalement en ouvrant le li
 9. Dans `/admin`, vérifie que ton questionnaire et ton inscription apparaissent, puis teste les trois exports.
 10. **Supprime ensuite tes réponses de test** (rubrique « Les mots » → « Supprimer tout ce questionnaire », et « Liste d’attente » → « Supprimer »). Pour repartir d’une base vide, tu peux aussi exécuter dans la console D1 : `DELETE FROM survey_responses; DELETE FROM waitlist;`
 
-⏱️ **Durée réelle** : demande à 3 ou 4 personnes de confiance de chronométrer leur parcours. L’accueil annonce « Environ 10 minutes » : donne-moi les vrais temps et j’ajuste. Si c’est trop long, je te proposerai des allègements **avant** de supprimer des questions importantes.
+⏱️ **Durée réelle** : demande à 3 ou 4 personnes de confiance de chronométrer leur parcours. L’accueil annonce « Environ 15 minutes » : donne-moi les vrais temps et j’ajuste. Si c’est trop long, je te proposerai des allègements **avant** de supprimer des questions importantes.
 
 ---
 
