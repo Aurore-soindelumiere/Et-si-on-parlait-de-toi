@@ -1,0 +1,13 @@
+{
+  "name": "et-si-on-parlait-de-toi",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev",
+    "db:local": "wrangler d1 execute et-si-on-parlait-de-toi --local --file=./migrations/0001_init.sql",
+    "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "wrangler": "4.168.0"
+  }
+}

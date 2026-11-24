@@ -1,0 +1,9 @@
+# Configuration Cloudflare Pages + D1
+name = "et-si-on-parlait-de-toi"
+compatibility_date = "2025-09-01"
+pages_build_output_dir = "./public"
+
+[[d1_databases]]
+binding = "DB"                                   # nom utilisé dans le code (env.DB)
+database_name = "et-si-on-parlait-de-toi"
+database_id = "979b41ce-ae9e-4a6b-b7eb-e97493209000"

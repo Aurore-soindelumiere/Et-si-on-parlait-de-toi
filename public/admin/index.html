@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Espace privé · Et si on parlait de toi ?</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <div>
+        <p class="eyebrow">Mon espace privé</p>
+        <h1>Et si on parlait de toi ?</h1>
+      </div>
+      <button class="btn-ghost" id="refresh" type="button">Actualiser</button>
+    </div>
+    <nav class="tabs" aria-label="Rubriques">
+      <button data-tab="overview" class="on">Vue d’ensemble</button>
+      <button data-tab="priorities">Univers prioritaires</button>
+      <button data-tab="all">Toutes les réponses</button>
+      <button data-tab="texts">Les mots</button>
+      <button data-tab="formats">Formats préférés</button>
+      <button data-tab="business">Modèle économique</button>
+      <button data-tab="waitlist">Liste d’attente</button>
+      <button data-tab="exports">Exports</button>
+    </nav>
+  </header>
+  <main id="view" class="wrap" tabindex="-1">
+    <p class="muted">Chargement…</p>
+  </main>
+  <script type="module" src="/admin/admin.js"></script>
+</body>
+</html>
