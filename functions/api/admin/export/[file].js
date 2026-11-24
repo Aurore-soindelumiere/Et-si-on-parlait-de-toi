@@ -20,18 +20,20 @@ function labelOf(options, id) {
 }
 
 function responsesCsv(rows) {
-  const header = ['identifiant', 'date (heure de Paris)', 'version', 'chapitre_complementaire'];
+  const header = ['identifiant', 'date (heure de Paris)', 'version', 'chapitre_facultatif (anciennes versions)'];
   for (const q of QUESTIONS) {
-    if (q.type === 'text') header.push(`Q${q.number} (texte libre)`);
-    else if (q.type === 'budget') for (const p of q.parts) header.push(`Q${q.number} ${p.id === 'monthly' ? 'A mensuel' : 'B achat'}`);
+    const n = q.retired ? `${q.id.toUpperCase()} (retirée)` : `Q${q.number}`;
+    if (q.type === 'text') header.push(`${n} (texte libre)`);
+    else if (q.type === 'budget') for (const p of q.parts) header.push(`${n} ${p.id === 'monthly' ? 'A mensuel' : 'B achat'}`);
     else {
-      header.push(`Q${q.number}`);
-      if (hasOther(q)) header.push(`Q${q.number} autre (texte)`);
+      header.push(`${n} ${q.title}`);
+      if (hasOther(q)) header.push(`${n} autre (texte)`);
     }
   }
   const lines = rows.map((row) => {
     const a = answersOf(row);
-    const line = [row.id, parisDate(row.created_at), row.survey_version, STATUS_FR[row.extra_status] || row.extra_status];
+    const old = ['2027-v1', '2027-v2'].includes(row.survey_version);
+    const line = [row.id, parisDate(row.created_at), row.survey_version, old ? (STATUS_FR[row.extra_status] || row.extra_status) : ''];
     for (const q of QUESTIONS) {
       const v = a[q.id];
       if (q.type === 'text') line.push(v ? v.text : '');
@@ -55,7 +57,7 @@ function statsCsv(rows) {
       continue;
     }
     for (const o of s.options) {
-      lines.push([s.id.replace(/^q/, 'Q'), s.title, o.id, o.label, o.count, formatNumberFr(o.percent), s.respondents, s.skipped, s.base]);
+      lines.push([s.retired ? `${s.id.toUpperCase()} (retirée)` : `Q${s.number}${s.id.endsWith('_monthly') ? ' A' : s.id.endsWith('_purchase') ? ' B' : ''}`, s.title, o.id, o.label, o.count, formatNumberFr(o.percent), s.respondents, s.skipped, s.base]);
     }
   }
   return toCsv(header, lines);

@@ -3,14 +3,13 @@
 // =====================================================================
 
 import {
-  SURVEY_VERSION, ESTIMATED_DURATION, LIMITS, CHAPTERS, MAIN_QUESTIONS, EXTRA_QUESTIONS,
+  SURVEY_VERSION, ESTIMATED_DURATION, LIMITS, MAIN_QUESTIONS, isShown,
   getQuestion, getChapter, WAITLIST_CONSENT_TEXT,
 } from './questions.js';
 
 const STORAGE_KEY = 'esopdt-progress';
 const TECH_ERROR = 'Un petit souci technique est survenu. Tes réponses sont toujours là. Tu peux réessayer de les envoyer.';
-const TOTAL_MAIN = MAIN_QUESTIONS.length;
-const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI'];
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
 // ---------- Icônes ----------
 const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 0c.6 7 5 11.4 12 12-7 .6-11.4 5-12 12-.6-7-5-11.4-12-12 7-.6 11.4-5 12-12z"/></svg>';
@@ -45,7 +44,7 @@ function storageClear() {
 
 // ---------- État ----------
 function freshState() {
-  return { v: SURVEY_VERSION, phase: 'welcome', step: 0, answers: {}, id: null, token: null, extraStep: 0, extraAnswers: {} };
+  return { v: SURVEY_VERSION, phase: 'welcome', step: 0, answers: {}, id: null, token: null };
 }
 let state = freshState();
 const saved = storageGet();
@@ -53,21 +52,29 @@ const saved = storageGet();
 function persist() {
   if (state.phase === 'main') {
     storageSet({ v: state.v, phase: 'main', step: state.step, answers: state.answers, id: state.id, token: state.token });
-  } else if (state.phase === 'extra-intro' || state.phase === 'extra') {
-    // Le questionnaire principal est enregistré : on ne garde plus ses réponses sur l'appareil.
-    storageSet({ v: state.v, phase: state.phase, id: state.id, token: state.token, extraStep: state.extraStep, extraAnswers: state.extraAnswers });
   } else {
     storageClear();
   }
 }
 
-// Parcours principal : écrans de chapitre + questions
-const MAIN_FLOW = [];
-for (const q of MAIN_QUESTIONS) {
-  const prev = MAIN_FLOW.length ? MAIN_FLOW[MAIN_FLOW.length - 1] : null;
-  const prevChapter = prev ? (prev.kind === 'chapter' ? prev.chapter : getQuestion(prev.id).chapter) : null;
-  if (q.chapter !== prevChapter) MAIN_FLOW.push({ kind: 'chapter', chapter: q.chapter });
-  MAIN_FLOW.push({ kind: 'question', id: q.id });
+// Parcours : écrans de chapitre + questions. Recalculé à chaque écran, car les
+// questions d'approfondissement n'apparaissent que si la thématique a été choisie.
+function buildFlow(answers) {
+  const flow = [];
+  let prevChapter = null;
+  for (const q of MAIN_QUESTIONS) {
+    if (!isShown(q, answers)) continue;
+    if (q.chapter !== prevChapter) flow.push({ kind: 'chapter', chapter: q.chapter });
+    flow.push({ kind: 'question', id: q.id });
+    prevChapter = q.chapter;
+  }
+  return flow;
+}
+
+/** Numéro du chapitre tel qu'il apparaît (les chapitres sautés ne comptent pas). */
+function chapterNumber(flow, chapterId) {
+  const chapters = flow.filter((f) => f.kind === 'chapter').map((f) => f.chapter);
+  return chapters.indexOf(chapterId) + 1;
 }
 
 // ---------- Utilitaires ----------
@@ -145,10 +152,8 @@ function divider() { return `<div class="divider" aria-hidden="true">${STAR}</di
 //  ÉCRAN D'ACCUEIL
 // =====================================================================
 function renderWelcome() {
-  const canResume = saved && (saved.phase === 'main' || saved.phase === 'extra-intro' || saved.phase === 'extra');
-  const resumeLabel = saved && saved.phase !== 'main'
-    ? 'Tes réponses principales sont bien enregistrées. Tu peux reprendre là où tu t’étais arrêtée.'
-    : 'Tu avais commencé ta parenthèse. Tes réponses t’attendent sur cet appareil.';
+  const canResume = saved && saved.phase === 'main';
+  const resumeLabel = 'Tu avais commencé ta parenthèse. Tes réponses t’attendent sur cet appareil.';
 
   show(`
     <p class="eyebrow">Les coulisses de 2027</p>
@@ -188,9 +193,7 @@ function renderWelcome() {
     });
     app.querySelector('[data-action="resume"]')?.addEventListener('click', () => {
       state = { ...freshState(), ...saved };
-      if (state.phase === 'main') renderMain();
-      else if (state.phase === 'extra-intro') renderExtraIntro();
-      else renderExtra();
+      renderMain();
     });
     app.querySelector('[data-action="restart"]')?.addEventListener('click', () => {
       if (!window.confirm('Effacer les réponses enregistrées sur cet appareil et recommencer depuis le début ?')) return;
@@ -207,12 +210,14 @@ function renderWelcome() {
 //  PARCOURS PRINCIPAL
 // =====================================================================
 function renderMain() {
-  state.step = Math.max(0, Math.min(state.step, MAIN_FLOW.length - 1));
+  const flow = buildFlow(state.answers);
+  state.step = Math.max(0, Math.min(state.step, flow.length - 1));
   persist();
-  const item = MAIN_FLOW[state.step];
-  if (item.kind === 'chapter') { renderChapter(item.chapter); return; }
-  const isLast = state.step === MAIN_FLOW.length - 1;
+  const item = flow[state.step];
+  if (item.kind === 'chapter') { renderChapter(item.chapter, flow); return; }
+  const isLast = state.step === flow.length - 1;
   renderQuestion(getQuestion(item.id), state.answers, {
+    flow,
     // Dernière question (Q20) : bouton de validation et envoi au serveur.
     nextLabel: isLast ? 'Valider mes réponses' : null,
     onBack: () => { state.step--; renderMain(); },
@@ -224,12 +229,12 @@ function renderMain() {
   });
 }
 
-function renderChapter(chapterId) {
+function renderChapter(chapterId, flow) {
   const ch = getChapter(chapterId);
   show(`
     ${SPRIG}
     <div class="chapter-screen">
-      <p class="chapter-num">Chapitre ${ROMAN[ch.number]}</p>
+      <p class="chapter-num">Chapitre ${ROMAN[chapterNumber(flow, chapterId)]}</p>
       <h2 class="chapter-title" tabindex="-1" data-focus>${esc(ch.title)}</h2>
       ${divider()}
       <div class="chapter-intro">${ch.intro.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
@@ -311,7 +316,6 @@ function prepareQuestion(q, answers) {
 // =====================================================================
 function renderQuestion(q, answers, opts) {
   prepareQuestion(q, answers);
-  const isExtra = q.chapter === 'extra';
   const ch = getChapter(q.chapter);
   const adapt = activeAdapt(q, answers);
   const title = adapt ? adapt.title : q.title;
@@ -319,12 +323,14 @@ function renderQuestion(q, answers, opts) {
   const src = q.source ? getSelected(answers, q.source) : [];
   const note = q.source ? (src.length ? q.note : q.noteWhenSkipped) : q.note;
 
-  let total; let index;
-  if (isExtra) { total = EXTRA_QUESTIONS.length; index = EXTRA_QUESTIONS.indexOf(q) + 1; }
-  else { total = TOTAL_MAIN; index = q.number; }
-  const progress = isExtra ? (index - 1) / total : (index - 1) / total;
-  const chapLabel = isExtra ? ch.title : `Chapitre ${ch.number} · ${ch.title}`;
-  const countLabel = isExtra ? `Bonus ${index} / ${total}` : `Question ${index} / ${total}`;
+  // Numérotation selon les questions réellement posées à cette participante.
+  const flow = opts.flow || buildFlow(answers);
+  const qIds = flow.filter((f) => f.kind === 'question').map((f) => f.id);
+  const total = qIds.length;
+  const index = qIds.indexOf(q.id) + 1;
+  const progress = (index - 1) / total;
+  const chapLabel = `Chapitre ${chapterNumber(flow, q.chapter)} · ${ch.title}`;
+  const countLabel = `Question ${index} / ${total}`;
 
   let body = '';
   if (q.type === 'text') {
@@ -513,7 +519,7 @@ function cleanAnswers(answers) {
   const out = {};
   for (const [qid, a] of Object.entries(answers)) {
     const q = getQuestion(qid);
-    if (!q || !hasAnswer(q, answers)) continue;
+    if (!q || !isShown(q, answers) || !hasAnswer(q, answers)) continue;
     if (q.type === 'text') out[qid] = { text: a.text.trim() };
     else if (q.type === 'budget') out[qid] = { ...a };
     else {
@@ -552,90 +558,10 @@ async function submitMain(btn) {
   }
   submitting = false;
 
-  if (res.ok) {
-    state.answers = {};
-    state.phase = 'extra-intro';
-    persist();
-    renderExtraIntro();
-    return;
-  }
-  btn.disabled = false;
-  btn.textContent = 'Réessayer l’envoi';
-  showAlert(TECH_ERROR);
-}
-
-// =====================================================================
-//  CHAPITRE COMPLÉMENTAIRE
-// =====================================================================
-function renderExtraIntro() {
-  state.phase = 'extra-intro';
-  persist();
-  const ch = getChapter('extra');
-  show(`
-    ${SPRIG}
-    <div class="chapter-screen">
-      <p class="chapter-num">Tes réponses sont bien enregistrées 🤎</p>
-      <h2 class="chapter-title" tabindex="-1" data-focus>${esc(ch.title)}</h2>
-      ${divider()}
-      <div class="chapter-intro">${ch.intro.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
-      <div class="cta" style="display:flex;flex-direction:column;gap:12px">
-        <button class="btn btn-primary btn-block" data-action="continue">Je continue</button>
-        <button class="btn btn-outline btn-block" data-action="stop">Je préfère terminer ici</button>
-      </div>
-    </div>
-  `, () => {
-    app.querySelector('[data-action="continue"]').addEventListener('click', () => {
-      state.phase = 'extra';
-      state.extraStep = 0;
-      persist();
-      renderExtra();
-    });
-    app.querySelector('[data-action="stop"]').addEventListener('click', () => {
-      // On le signale au serveur sans bloquer la participante.
-      fetch('/api/survey/extra', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
-        body: JSON.stringify({ id: state.id, token: state.token, status: 'declined' }),
-      }).catch(() => {});
-      finish();
-    });
-  });
-}
-
-function renderExtra() {
-  state.phase = 'extra';
-  state.extraStep = Math.max(0, Math.min(state.extraStep, EXTRA_QUESTIONS.length - 1));
-  persist();
-  const q = EXTRA_QUESTIONS[state.extraStep];
-  const isLast = state.extraStep === EXTRA_QUESTIONS.length - 1;
-  renderQuestion(q, state.extraAnswers, {
-    nextLabel: isLast ? 'Terminer ma parenthèse' : null,
-    onBack: () => {
-      if (state.extraStep === 0) { renderExtraIntro(); return; }
-      state.extraStep--; renderExtra();
-    },
-    onNext: (btn) => {
-      if (isLast) { submitExtra(btn); return; }
-      state.extraStep++; renderExtra();
-    },
-    onChange: () => persist(),
-  });
-}
-
-async function submitExtra(btn) {
-  if (submitting) return;
-  submitting = true;
-  btn.disabled = true;
-  btn.textContent = 'Envoi en cours…';
-  app.querySelector('[data-alert]').innerHTML = '';
-  const res = await postJson('/api/survey/extra', {
-    id: state.id, token: state.token, status: 'completed', answers: cleanAnswers(state.extraAnswers),
-  });
-  submitting = false;
   if (res.ok) { finish(); return; }
   btn.disabled = false;
   btn.textContent = 'Réessayer l’envoi';
-  showAlert(TECH_ERROR, '<button class="btn-link" data-action="skip-extra">Terminer sans envoyer ces dernières réponses</button>');
-  app.querySelector('[data-action="skip-extra"]')?.addEventListener('click', finish);
+  showAlert(TECH_ERROR);
 }
 
 // =====================================================================

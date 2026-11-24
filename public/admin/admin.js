@@ -43,8 +43,12 @@ function bars(options, { rank = false } = {}) {
 }
 
 function questionCard(s, note = '') {
-  const label = s.id.startsWith('q25_') ? `Question 25 ${s.id.endsWith('monthly') ? 'A' : 'B'}` : `Question ${s.number}`;
-  const base = s.chapter === 'extra' ? 'ayant complété le chapitre facultatif' : 'au total';
+  const num = s.retired ? 'retirée' : s.number;
+  const label = s.id.startsWith('q25_') ? `Question ${s.number} ${s.id.endsWith('monthly') ? 'A' : 'B'}` : `Question ${num}`;
+  const base = 'à qui elle a été posée';
+  const scope = s.retired
+    ? '<br>Question retirée dans la version courte : seules les réponses des premières participantes apparaissent ici.'
+    : s.conditional ? '<br>Approfondissement : posé uniquement aux personnes ayant choisi la thématique correspondante à la question 7.' : '';
   const limits = s.max ? ` · ${s.max} réponses max.` : '';
   if (s.type === 'text') {
     return `<div class="card"><p class="eyebrow">${label}</p><h3>${esc(s.title)}</h3>
@@ -55,7 +59,7 @@ function questionCard(s, note = '') {
     <p class="eyebrow">${label}</p>
     <h3>${esc(s.title)}</h3>
     <p class="meta"><b>${s.respondents}</b> personne(s) ont répondu · <b>${s.skipped}</b> ont passé la question (sur ${s.base} ${base})${limits}${s.otherTexts ? ` · ${s.otherTexts} précision(s) « Autre »` : ''}
-    ${s.type === 'multi' ? '<br>Plusieurs choix possibles : les pourcentages (calculés sur les répondantes) peuvent dépasser 100 % au total.' : ''}${note}</p>
+    ${s.type === 'multi' ? '<br>Plusieurs choix possibles : les pourcentages (calculés sur les répondantes) peuvent dépasser 100 % au total.' : ''}${scope}${note}</p>
     ${s.respondents ? bars(s.options) : '<p class="muted">Pas encore de réponse.</p>'}
   </div>`;
 }
@@ -70,7 +74,6 @@ const TABS = {
       <h2 class="section-title">Vue d’ensemble</h2>
       <div class="tiles">
         <div class="tile"><div class="n">${o.total}</div><div class="l">questionnaires enregistrés</div></div>
-        <div class="tile"><div class="n">${o.extraCompleted}</div><div class="l">avec chapitre complémentaire</div></div>
         <div class="tile"><div class="n">${o.waitlist}</div><div class="l">inscriptions liste d’attente</div></div>
         <div class="tile"><div class="n">${o.today}</div><div class="l">réponses aujourd’hui</div></div>
         <div class="tile"><div class="n">${o.last7days}</div><div class="l">réponses ces 7 derniers jours</div></div>
@@ -86,8 +89,7 @@ const TABS = {
           ${o.daily.filter((d) => d.count).map((d) => `<tr><td>${short(d.day)}</td><td class="num">${d.count}</td></tr>`).join('') || '<tr><td colspan="2" class="muted">Aucune réponse sur la période.</td></tr>'}
           </tbody></table></div>
         </details>
-      </div>
-      <p class="note">${o.extraDeclined} participante(s) ont préféré s’arrêter avant le chapitre complémentaire.</p>`;
+      </div>`;
   },
 
   async priorities(force) {
@@ -101,12 +103,12 @@ const TABS = {
     });
     return `
       <h2 class="section-title">Les univers prioritaires</h2>
-      <p class="note">Classement A = « populaire » (dans les 3 priorités). Classement B = « vraiment prioritaire » (LE besoin n°1). Les deux ne sont jamais mélangés.</p>
+      <p class="note">Classement A = « populaire » (dans les 3 priorités, question 7). Classement B = « vraiment prioritaire » (LE besoin n°1, question 8). Les deux ne sont jamais mélangés.</p>
       <div class="grid2">
-        <div class="card"><p class="eyebrow">Classement A · Question 13</p><h3>Les trois besoins prioritaires</h3>
+        <div class="card"><p class="eyebrow">Classement A · Question 7</p><h3>Les trois besoins prioritaires</h3>
           <p class="meta">${a.respondents} participante(s) ont répondu · % = part des répondantes ayant sélectionné la thématique.</p>
           ${a.respondents ? bars(a.options, { rank: true }) : '<p class="muted">Pas encore de réponse.</p>'}</div>
-        <div class="card"><p class="eyebrow">Classement B · Question 14</p><h3>Le besoin prioritaire absolu</h3>
+        <div class="card"><p class="eyebrow">Classement B · Question 8</p><h3>Le besoin prioritaire absolu</h3>
           <p class="meta">${b.respondents} participante(s) ont répondu · % = part des répondantes l’ayant choisie comme priorité n°1.</p>
           ${b.respondents ? bars(b.options, { rank: true }) : '<p class="muted">Pas encore de réponse.</p>'}</div>
       </div>
@@ -120,7 +122,7 @@ const TABS = {
   async all(force) {
     const data = await load('stats', '/api/admin/stats', force);
     return `<h2 class="section-title">Toutes les réponses</h2>
-      <p class="note">${data.total} questionnaire(s) · ${data.extraCompleted} avec chapitre complémentaire. « Passée » = la participante n’a rien sélectionné (différent d’une réponse négative comme « Aucune de ces phrases », affichée en italique).</p>
+      <p class="note">${data.total} questionnaire(s). « Passée » = la participante n’a rien sélectionné (différent d’une réponse négative comme « Aucune de ces phrases », affichée en italique). Les réponses suivies de « (ancienne formulation) » viennent des premières versions du questionnaire.</p>
       ${data.questions.map((s) => questionCard(s)).join('')}`;
   },
 
@@ -144,10 +146,11 @@ const TABS = {
       ['Les durées préférées', 'q17'], ['Les moments de la journée', 'q18'],
       ['Les habitudes d’écoute', 'q21'], ['Les attentes envers les audios', 'q22'],
       ['Ce qu’elles attendent d’un moment pour soi', 'q15'], ['Les freins du quotidien', 'q16'],
-      ['Les fonctionnalités souhaitées', 'q23'], ['Parcours guidés ou utilisation libre', 'q19'],
+      ['Les fonctionnalités souhaitées', 'q23'], ['Parcours guidés ou utilisation libre', 'q19b'],
+      ['Parcours guidés ou utilisation libre (ancienne version)', 'q19'],
     ];
     return `<h2 class="section-title">Les formats préférés</h2>
-      ${groups.map(([t, id]) => `<p class="eyebrow" style="margin-top:22px">${t}</p>${questionCard(pick(id), id === 'q22' ? '<br>Les personnes n’ayant jamais utilisé d’audios ont vu une formulation adaptée (« Qu’est-ce qui pourrait te donner envie… »).' : '')}`).join('')}`;
+      ${groups.filter(([, id]) => pick(id)).map(([t, id]) => `<p class="eyebrow" style="margin-top:22px">${t}</p>${questionCard(pick(id), id === 'q22' ? '<br>Les personnes n’ayant jamais utilisé d’audios ont vu une formulation adaptée (« Qu’est-ce qui pourrait te donner envie… »).' : '')}`).join('')}`;
   },
 
   async business(force) {
