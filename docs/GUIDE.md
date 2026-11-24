@@ -85,7 +85,7 @@ La base de données est reliée automatiquement grâce au fichier `wrangler.toml
 6. Enregistre. Puis ouvre l’application créée et copie son **Application Audience (AUD) Tag** (une longue suite de caractères).
 
 ### 4c. Donner ces informations à l’application
-Dans **Workers & Pages → et-si-on-parlait-de-toi → Paramètres → Variables et secrets** (*Settings → Variables and Secrets*), pour l’environnement **Production**, ajoute :
+Dans **Workers & Pages → et-si-on-parlait-de-toi → Paramètres → Variables et secrets** (*Settings → Variables and Secrets*), pour l’environnement **Production**, ajoute ces 3 valeurs en choisissant le type **Secret** (important : comme le projet contient un fichier `wrangler.toml`, les simples « variables texte » ajoutées dans le tableau de bord sont effacées à chaque mise en ligne ; les secrets, eux, sont conservés) :
 
 | Nom | Valeur |
 |---|---|

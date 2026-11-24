@@ -28,7 +28,9 @@ tests/                       ← tests automatiques
 wrangler.toml                ← configuration Cloudflare (ID de la base D1)
 ```
 
-## Variables d’environnement (Cloudflare Pages → Paramètres → Variables)
+## Variables d’environnement (Cloudflare Pages → Paramètres → Variables, type **Secret**)
+
+À enregistrer comme *secrets* : avec un `wrangler.toml` présent, les variables texte du tableau de bord sont écrasées au déploiement.
 
 | Nom | Exemple | Rôle |
 |---|---|---|
