@@ -10,7 +10,7 @@
 //  une fois le questionnaire publié.
 // =====================================================================
 
-export const SURVEY_VERSION = '2027-v1';
+export const SURVEY_VERSION = '2027-v2';
 
 // Durée affichée sur l'écran d'accueil (à ajuster après tes tests).
 export const ESTIMATED_DURATION = 'Environ 15 minutes';
@@ -403,7 +403,7 @@ export const QUESTIONS = [
   },
   {
     id: 'q15', number: 15, chapter: 'c4', type: 'multi', max: 3,
-    title: 'Qu’attends-tu réellement d’un moment consacré à toi-même ?',
+    title: 'Quand tu prends du temps pour prendre soin de toi ou travailler sur toi, qu’aimerais-tu vraiment que ce moment t’apporte ?',
     hint: 'Trois réponses maximum.',
     options: [
       { id: 'soothed_now', label: 'Me sentir immédiatement plus apaisée.' },
@@ -450,14 +450,23 @@ export const QUESTIONS = [
     title: 'Combien de temps pourrais-tu réellement t’accorder ?',
     hint: 'Une seule réponse possible.',
     options: [
-      { id: 'm3_5', label: '3 à 5 minutes.' },
-      { id: 'm6_10', label: '6 à 10 minutes.' },
-      { id: 'm11_15', label: '11 à 15 minutes.' },
-      { id: 'm16_25', label: '16 à 25 minutes.' },
-      { id: 'm26_30', label: '26 à 30 minutes.' },
+      { id: 'lt5', label: 'Moins de 5 minutes.' },
+      { id: 'm5_10', label: 'Entre 5 et 10 minutes.' },
+      { id: 'm10_15', label: 'Entre 10 et 15 minutes.' },
+      { id: 'm15_20', label: 'Entre 15 et 20 minutes.' },
+      { id: 'm20_30', label: 'Entre 20 et 30 minutes.' },
       { id: 'm30_plus', label: 'Plus de 30 minutes.' },
       { id: 'depends', label: 'Cela dépend vraiment des jours.' },
       { id: 'dont_know', label: 'Je ne sais pas encore.' },
+    ],
+    // Anciennes réponses (version 2027-v1) : plus proposées, mais toujours
+    // affichées dans les statistiques si des participantes les ont choisies.
+    legacyOptions: [
+      { id: 'm3_5', label: '3 à 5 minutes. (ancienne formulation)' },
+      { id: 'm6_10', label: '6 à 10 minutes. (ancienne formulation)' },
+      { id: 'm11_15', label: '11 à 15 minutes. (ancienne formulation)' },
+      { id: 'm16_25', label: '16 à 25 minutes. (ancienne formulation)' },
+      { id: 'm26_30', label: '26 à 30 minutes. (ancienne formulation)' },
     ],
   },
   {

@@ -30,8 +30,10 @@ function pct(count, base) {
 }
 
 function choiceStats(question, rows, base, idSuffix = '', partId = null) {
-  const options = partId ? question.parts.find((p) => p.id === partId).options : question.options;
-  const counts = Object.fromEntries(options.map((o) => [o.id, 0]));
+  const current = partId ? question.parts.find((p) => p.id === partId).options : question.options;
+  const legacy = partId ? [] : (question.legacyOptions || []);
+  const allOptions = [...current, ...legacy];
+  const counts = Object.fromEntries(allOptions.map((o) => [o.id, 0]));
   let respondents = 0;
   let otherTexts = 0;
   for (const row of rows) {
@@ -61,7 +63,8 @@ function choiceStats(question, rows, base, idSuffix = '', partId = null) {
     respondents,
     skipped: Math.max(0, base - respondents),
     otherTexts,
-    options: options
+    // Les anciennes options n'apparaissent que si quelqu'un les a choisies.
+    options: [...current, ...legacy.filter((o) => counts[o.id] > 0)]
       .map((o) => ({
         id: o.id,
         label: o.label,
