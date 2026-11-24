@@ -403,7 +403,8 @@ export const QUESTIONS = [
   },
   {
     id: 'q15', number: 15, chapter: 'c4', type: 'multi', max: 3,
-    title: 'Quand tu prends du temps pour prendre soin de toi ou travailler sur toi, qu’aimerais-tu vraiment que ce moment t’apporte ?',
+    title: 'Quand tu t’accordes un moment pour prendre soin de toi, de l’intérieur, qu’aimerais-tu avant tout qu’il t’apporte ?',
+    note: 'Souffler, comprendre, avancer… ou un peu de tout ça. Il n’y a pas de bonne réponse.',
     hint: 'Trois réponses maximum.',
     options: [
       { id: 'soothed_now', label: 'Me sentir immédiatement plus apaisée.' },
