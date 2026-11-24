@@ -37,7 +37,7 @@ function responsesCsv(rows) {
       if (q.type === 'text') line.push(v ? v.text : '');
       else if (q.type === 'budget') for (const p of q.parts) line.push(v && v[p.id] ? labelOf(p.options, v[p.id]) : '');
       else {
-        line.push(v ? v.selected.map((id) => labelOf(q.options, id)).join(' | ') : '');
+        line.push(v ? v.selected.map((id) => labelOf([...q.options, ...(q.legacyOptions || [])], id)).join(' | ') : '');
         if (hasOther(q)) line.push(v && v.other ? v.other : '');
       }
     }

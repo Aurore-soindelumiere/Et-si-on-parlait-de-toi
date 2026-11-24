@@ -17,13 +17,13 @@ test('identifiants de questions et d’options uniques', () => {
   assert.equal(EXTRA.length, 5);
 });
 test('réponses valides acceptées, questions passées ignorées', () => {
-  const r = validateAnswers({ q1: { selected: ['compare', 'other'], other: '  un mot  ' }, q2: { selected: [] }, q17: { selected: ['m6_10'] } }, MAIN);
-  assert.deepEqual(r, { q1: { selected: ['compare', 'other'], other: 'un mot' }, q17: { selected: ['m6_10'] } });
+  const r = validateAnswers({ q1: { selected: ['compare', 'other'], other: '  un mot  ' }, q2: { selected: [] }, q17: { selected: ['m5_10'] } }, MAIN);
+  assert.deepEqual(r, { q1: { selected: ['compare', 'other'], other: 'un mot' }, q17: { selected: ['m5_10'] } });
 });
 test('limites, exclusivité, Q14 dynamique', () => {
   assert.throws(() => validateAnswers({ q12: { selected: ['love_self', 'confidence', 'value', 'choose_self', 'take_place', 'joy'] } }, MAIN));
   assert.throws(() => validateAnswers({ q16: { selected: ['nothing', 'time'] } }, MAIN));
-  assert.throws(() => validateAnswers({ q17: { selected: ['m6_10', 'm3_5'] } }, MAIN));
+  assert.throws(() => validateAnswers({ q17: { selected: ['m5_10', 'lt5'] } }, MAIN));
   assert.throws(() => validateAnswers({ q13: { selected: ['joy'] }, q14: { selected: ['grief'] } }, MAIN));
   assert.ok(validateAnswers({ q14: { selected: ['grief'] } }, MAIN).q14); // Q13 passée → liste complète
   assert.throws(() => validateAnswers({ q1: { selected: ['inconnue'] } }, MAIN));
@@ -43,4 +43,18 @@ test('CSV protégé contre les formules', () => {
   assert.ok(csv.startsWith('﻿'));
   assert.ok(csv.includes("'=1+1") && csv.includes("'+33 6") && csv.includes("'@SUM"));
   assert.ok(csv.includes('"texte; avec ""guillemets"""'));
+});
+
+test('Q17 : anciennes réponses refusées à l’envoi mais conservées dans les statistiques', async () => {
+  const { computeQuestionStats } = await import('../functions/_lib/stats.js');
+  assert.throws(() => validateAnswers({ q17: { selected: ['m6_10'] } }, MAIN));
+  const rows = [
+    { main: { q17: { selected: ['m6_10'] } }, extra: {}, extra_status: 'not_started' },
+    { main: { q17: { selected: ['m5_10'] } }, extra: {}, extra_status: 'not_started' },
+  ];
+  const q17 = computeQuestionStats(rows).find((q) => q.id === 'q17');
+  assert.equal(q17.respondents, 2);
+  assert.equal(q17.options.find((o) => o.id === 'm6_10').count, 1);
+  assert.equal(q17.options.find((o) => o.id === 'm5_10').count, 1);
+  assert.ok(!q17.options.some((o) => o.id === 'm3_5')); // ancienne option jamais choisie : masquée
 });
